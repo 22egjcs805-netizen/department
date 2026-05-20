@@ -1,0 +1,51 @@
+# ─────────────────────────────────────────────────────────────
+#  k8s/deployment.yaml — Kubernetes manifests
+#  NOTE: Tkinter GUI pods need a display server (X11/VNC)
+#        This setup uses a VNC sidecar for headless environments
+# ─────────────────────────────────────────────────────────────
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: departmental-store
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: departmental-store
+
+  template:
+    metadata:
+      labels:
+        app: departmental-store
+
+    spec:
+      containers:
+        - name: store-app
+          image: sumit0177/departmental-store:latest   
+          env:
+            - name: DISPLAY
+              value: ":0"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: departmental-store-service
+spec:
+  selector:
+    app: departmental-store
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP

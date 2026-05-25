@@ -1,10 +1,10 @@
-# ─────────────────────────────────────────────────────────────
-# Dockerfile — Departmental Store Tkinter App (Headless)
-# ─────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────
+# Dockerfile — Departmental Store Tkinter App
+# ─────────────────────────────────────────────
 
 FROM python:3.11-slim
 
-# Install Tkinter + X11 libs + xvfb for headless GUI
+# Install Tkinter + X11 libs + xvfb + xauth
 RUN apt-get update && apt-get install -y --no-install-recommends \
         python3-tk \
         tk-dev \
@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libxtst6 \
         libxi6 \
         xvfb \
-        wget \
+        
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
@@ -24,11 +24,8 @@ WORKDIR /app
 COPY store_app.py .
 COPY requirements.txt .
 
-# Install optional packages if needed
-RUN pip install --no-cache-dir -r requirements.txt || true
-
-# Environment for X11 (used by xvfb)
+# Environment for headless display
 ENV DISPLAY=:99
 
-# Run the app using xvfb (headless display)
-CMD ["xvfb-run", "-a", "python", "store_app.py"]
+# Run the app inside xvfb (headless)
+CMD ["sh", "-c", "xvfb-run -a python store_app.py"]
